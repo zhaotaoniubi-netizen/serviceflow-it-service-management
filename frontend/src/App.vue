@@ -9,7 +9,13 @@ const error = ref('')
 const showForm = ref(false)
 const editingId = ref(null)
 const filters = reactive({ status: '', priority: '' })
-const form = reactive({ title: '', description: '', status: 'NEW', priority: 'MEDIUM' })
+const form = reactive({
+  title: '',
+  description: '',
+  status: 'NEW',
+  category: 'OTHER',
+  priority: 'MEDIUM'
+})
 const fieldErrors = ref({})
 
 const statuses = [
@@ -20,6 +26,16 @@ const statuses = [
   'RESOLVED',
   'CLOSED'
 ]
+
+const categories = [
+  'HARDWARE',
+  'SOFTWARE',
+  'NETWORK',
+  'ACCOUNT',
+  'ACCESS_REQUEST',
+  'OTHER'
+]
+
 const priorities = ['LOW', 'MEDIUM', 'HIGH','CRITICAL']
 const counts = computed(() => ({
   total: tickets.value.length,
@@ -48,7 +64,13 @@ async function loadTickets() {
 
 function openCreate() {
   editingId.value = null
-  Object.assign(form, { title: '', description: '', status: 'NEW', priority: 'MEDIUM' })
+  Object.assign(form, {
+  title: '',
+  description: '',
+  status: 'NEW',
+  category: 'OTHER',
+  priority: 'MEDIUM'
+})
   fieldErrors.value = {}
   showForm.value = true
 }
@@ -119,7 +141,7 @@ onMounted(loadTickets)
 
         <div v-if="loading" class="empty"><div class="spinner"></div><p>Loading tickets…</p></div>
         <div v-else-if="!tickets.length" class="empty"><span>✓</span><h3>No tickets found</h3><p>Adjust the filters or create your first support ticket.</p><button class="secondary" @click="openCreate">Create ticket</button></div>
-        <div v-else class="table-wrap"><table><thead><tr><th>Ticket</th><th>Status</th><th>Priority</th><th>Created</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody><tr v-for="ticket in tickets" :key="ticket.id"><td><strong>{{ ticket.title }}</strong><p>{{ ticket.description }}</p><small>#{{ String(ticket.id).padStart(4, '0') }}</small></td><td><span class="badge" :class="`status-${ticket.status.toLowerCase()}`"><i></i>{{ label(ticket.status) }}</span></td><td><span class="priority" :class="ticket.priority.toLowerCase()">{{ label(ticket.priority) }}</span></td><td>{{ formatDate(ticket.createdAt) }}</td><td class="actions"><button title="Edit ticket" @click="openEdit(ticket)">Edit</button><button class="danger" title="Delete ticket" @click="deleteTicket(ticket)">Delete</button></td></tr></tbody></table></div>
+        <div v-else class="table-wrap"><table><thead><tr><th>Ticket</th><th>Category</th><th>Status</th><th>Priority</th><th>Created</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody><tr v-for="ticket in tickets" :key="ticket.id"><td><strong>{{ ticket.title }}</strong><p>{{ ticket.description }}</p><small>#{{ String(ticket.id).padStart(4, '0') }}</small></td><td><span class="badge" :class="`status-${ticket.status.toLowerCase()}`"><i></i>{{ label(ticket.status) }}</span></td><td><span class="priority" :class="ticket.priority.toLowerCase()">{{ label(ticket.priority) }}</span></td><td>{{ formatDate(ticket.createdAt) }}</td><td class="actions"><button title="Edit ticket" @click="openEdit(ticket)">Edit</button><button class="danger" title="Delete ticket" @click="deleteTicket(ticket)">Delete</button></td></tr></tbody></table></div>
       </section>
     </main>
 
@@ -127,6 +149,18 @@ onMounted(loadTickets)
       <form class="modal" @submit.prevent="saveTicket"><div class="modal-heading"><div><p class="eyebrow">{{ editingId ? 'UPDATE REQUEST' : 'NEW REQUEST' }}</p><h2>{{ editingId ? 'Edit ticket' : 'Create a ticket' }}</h2></div><button type="button" class="close" aria-label="Close" @click="showForm = false">×</button></div>
         <label>Title<input v-model="form.title" maxlength="120" placeholder="Briefly describe the issue" required /><small v-if="fieldErrors.title" class="error-text">{{ fieldErrors.title }}</small></label>
         <label>Description<textarea v-model="form.description" maxlength="2000" rows="5" placeholder="Add context, symptoms and useful details" required></textarea><small v-if="fieldErrors.description" class="error-text">{{ fieldErrors.description }}</small></label>
+        <label>
+  Category
+  <select v-model="form.category">
+    <option
+      v-for="category in categories"
+      :key="category"
+      :value="category"
+    >
+      {{ label(category) }}
+    </option>
+  </select>
+</label>
         <div class="form-row"><label>Status<select v-model="form.status"><option v-for="status in statuses" :key="status" :value="status">{{ label(status) }}</option></select></label><label>Priority<select v-model="form.priority"><option v-for="priority in priorities" :key="priority" :value="priority">{{ label(priority) }}</option></select></label></div>
         <div class="modal-actions"><button type="button" class="secondary" @click="showForm = false">Cancel</button><button class="primary" :disabled="saving">{{ saving ? 'Saving…' : editingId ? 'Save changes' : 'Create ticket' }}</button></div>
       </form>

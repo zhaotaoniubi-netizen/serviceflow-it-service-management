@@ -28,7 +28,7 @@ class TicketServiceTest {
 
     @Test
     void filtersByStatusAndPriority() {
-        Ticket ticket = new Ticket("Printer offline", "The office printer is unreachable", TicketPriority.HIGH);
+        Ticket ticket = new Ticket("Printer offline", "The office printer is unreachable", TicketCategory.HARDWARE, TicketPriority.HIGH);
         when(repository.findByStatusAndPriorityOrderByCreatedAtDesc(TicketStatus.NEW, TicketPriority.HIGH))
                 .thenReturn(List.of(ticket));
 
@@ -49,12 +49,12 @@ class TicketServiceTest {
 
     @Test
     void trimsInputWhenUpdating() {
-        Ticket ticket = new Ticket("Old", "Old description", TicketPriority.LOW);
+        Ticket ticket = new Ticket("Old", "Old description", TicketCategory.OTHER, TicketPriority.LOW);
         when(repository.findById(1L)).thenReturn(Optional.of(ticket));
         when(repository.save(ticket)).thenReturn(ticket);
 
         TicketResponse result = service.update(1L,
-                new TicketRequest("  New title  ", "  New description  ", TicketStatus.RESOLVED, TicketPriority.HIGH));
+                new TicketRequest("  New title  ", "  New description  ", TicketStatus.RESOLVED, TicketCategory.SOFTWARE, TicketPriority.HIGH));
 
         assertThat(result.title()).isEqualTo("New title");
         assertThat(result.description()).isEqualTo("New description");

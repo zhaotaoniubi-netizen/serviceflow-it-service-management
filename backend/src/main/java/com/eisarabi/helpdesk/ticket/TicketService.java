@@ -35,7 +35,7 @@ public class TicketService {
 
     @Transactional
     public TicketResponse create(TicketRequest request) {
-        Ticket ticket = new Ticket(request.title().trim(), request.description().trim(), request.priority());
+        Ticket ticket = new Ticket(request.title().trim(), request.description().trim(),  request.category(), request.priority());
         if (request.status() != null) ticket.setStatus(request.status());
         return TicketResponse.from(ticketRepository.save(ticket));
     }
@@ -45,6 +45,7 @@ public class TicketService {
         Ticket ticket = getTicket(id);
         ticket.setTitle(request.title().trim());
         ticket.setDescription(request.description().trim());
+        ticket.setCategory(request.category());
         ticket.setPriority(request.priority());
         ticket.setStatus(request.status() == null ? ticket.getStatus() : request.status());
         return TicketResponse.from(ticketRepository.save(ticket));

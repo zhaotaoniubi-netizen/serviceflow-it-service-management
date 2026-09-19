@@ -23,6 +23,10 @@ public class Ticket {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private TicketCategory category = TicketCategory.OTHER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TicketPriority priority = TicketPriority.LOW;
 
     @Column(nullable = false, updatable = false)
@@ -34,9 +38,10 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket(String title, String description, TicketPriority priority) {
+    public Ticket(String title, String description, TicketCategory category, TicketPriority priority) {
         this.title = title;
         this.description = description;
+        this.category = category;
         this.priority = priority;
         this.status = TicketStatus.NEW;
     }
@@ -79,6 +84,13 @@ public class Ticket {
 
     public void setStatus(TicketStatus status) {
         this.status = status;
+    }
+    public TicketCategory getCategory() {
+    return category;
+    }
+
+    public void setCategory(TicketCategory category) {
+    this.category = category;
     }
 
     public TicketPriority getPriority() {

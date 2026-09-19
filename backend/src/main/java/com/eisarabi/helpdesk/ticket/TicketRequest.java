@@ -8,6 +8,7 @@ public record TicketRequest(
         @NotBlank(message = "Title is required") @Size(max = 120, message = "Title must be 120 characters or fewer") String title,
         @NotBlank(message = "Description is required") @Size(max = 2000, message = "Description must be 2000 characters or fewer") String description,
         TicketStatus status,
+        @NotNull(message = "Category is required") TicketCategory category,
         @NotNull(message = "Priority is required") TicketPriority priority
 ) {
 }

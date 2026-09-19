@@ -36,7 +36,7 @@ class TicketControllerIntegrationTest {
         String createdJson = mockMvc.perform(post("/api/tickets")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"title":"Email unavailable","description":"Cannot connect to mailbox","priority":"HIGH"}
+                                {"title":"Email unavailable","description":"Cannot connect to mailbox","category":"ACCOUNT","priority":"HIGH"}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("NEW"))
@@ -51,7 +51,7 @@ class TicketControllerIntegrationTest {
         mockMvc.perform(put("/api/tickets/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"title":"Email restored","description":"Mailbox is available","status":"RESOLVED","priority":"HIGH"}
+                                {"title":"Email restored","description":"Mailbox is available","status":"RESOLVED","category":"ACCOUNT","priority":"HIGH"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("RESOLVED"));
