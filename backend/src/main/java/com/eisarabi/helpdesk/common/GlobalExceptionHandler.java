@@ -1,6 +1,7 @@
 package com.eisarabi.helpdesk.common;
 
 import com.eisarabi.helpdesk.ticket.TicketNotFoundException;
+import com.eisarabi.helpdesk.ticket.TicketBusinessRuleException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleNotFound(TicketNotFoundException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
     }
+
+    @ExceptionHandler(TicketBusinessRuleException.class)
+    public ResponseEntity<ApiError> handleBusinessRule(
+        TicketBusinessRuleException exception,
+        HttpServletRequest request) {
+
+    return build(
+            HttpStatus.BAD_REQUEST,
+            exception.getMessage(),
+            request,
+            Map.of()
+    );
+}
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException exception,

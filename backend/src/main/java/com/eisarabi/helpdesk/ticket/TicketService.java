@@ -41,7 +41,11 @@ public class TicketService {
         if (request.assignee() != null && !request.assignee().isBlank()) {
             ticket.setAssignee(request.assignee().trim());
         }
-        if (request.status() != null) ticket.setStatus(request.status());
+        validateAssignmentRule(request.status(), ticket.getAssignee());
+
+        if (request.status() != null) {
+            ticket.setStatus(request.status());
+        }
         return TicketResponse.from(ticketRepository.save(ticket));
     }
 
@@ -58,7 +62,12 @@ public class TicketService {
             );
         ticket.setCategory(request.category());
         ticket.setPriority(request.priority());
-        ticket.setStatus(request.status() == null ? ticket.getStatus() : request.status());
+        TicketStatus targetStatus =
+        request.status() == null ? ticket.getStatus() : request.status();
+
+        validateAssignmentRule(targetStatus, ticket.getAssignee());
+
+        ticket.setStatus(targetStatus);
         return TicketResponse.from(ticketRepository.save(ticket));
     }
 
@@ -70,4 +79,12 @@ public class TicketService {
     private Ticket getTicket(Long id) {
         return ticketRepository.findById(id).orElseThrow(() -> new TicketNotFoundException(id));
     }
+    private void validateAssignmentRule(TicketStatus status, String assignee) {
+    if (status == TicketStatus.ASSIGNED
+            && (assignee == null || assignee.isBlank())) {
+        throw new TicketBusinessRuleException(
+                "Assignee is required when status is ASSIGNED"
+        );
+    }
+}
 }

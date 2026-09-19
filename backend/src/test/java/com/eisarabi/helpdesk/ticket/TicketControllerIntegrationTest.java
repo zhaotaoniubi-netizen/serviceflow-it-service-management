@@ -83,4 +83,23 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
     }
+    @Test
+        void rejectsAssignedStatusWithoutAssignee() throws Exception {
+    mockMvc.perform(post("/api/tickets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                              "title":"VPN access issue",
+                              "description":"Unable to connect to company VPN",
+                              "requester":"Louis Zhao",
+                              "assignee":"",
+                              "status":"ASSIGNED",
+                              "category":"NETWORK",
+                              "priority":"HIGH"
+                            }
+                            """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message")
+                    .value("Assignee is required when status is ASSIGNED"));
+}
 }
