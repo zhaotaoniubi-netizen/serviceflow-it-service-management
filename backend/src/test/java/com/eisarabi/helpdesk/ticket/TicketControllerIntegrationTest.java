@@ -36,7 +36,7 @@ class TicketControllerIntegrationTest {
         String createdJson = mockMvc.perform(post("/api/tickets")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"title":"Email unavailable","description":"Cannot connect to mailbox","category":"ACCOUNT","priority":"HIGH"}
+                                {"title":"Email unavailable","description":"Cannot connect to mailbox","requester":"Louis Zhao","assignee":"","category":"ACCOUNT","priority":"HIGH"}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("NEW"))
@@ -51,7 +51,7 @@ class TicketControllerIntegrationTest {
         mockMvc.perform(put("/api/tickets/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"title":"Email restored","description":"Mailbox is available","status":"RESOLVED","category":"ACCOUNT","priority":"HIGH"}
+                                {"title":"Email restored","description":"Mailbox is available","requester":"Louis Zhao","assignee":"Alex Chan","status":"RESOLVED","category":"ACCOUNT","priority":"HIGH"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("RESOLVED"));
@@ -68,10 +68,12 @@ class TicketControllerIntegrationTest {
     void returnsStructuredValidationErrors() throws Exception {
         mockMvc.perform(post("/api/tickets")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\" \",\"description\":\"\",\"priority\":null}"))
+                        .content("{\"title\":\" \",\"description\":\"\",\"requester\":\" \",\"assignee\":\"\",\"category\":null,\"priority\":null}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.validationErrors.title").value("Title is required"))
+                .andExpect(jsonPath("$.validationErrors.requester").value("Requester is required"))
+                .andExpect(jsonPath("$.validationErrors.category").value("Category is required"))
                 .andExpect(jsonPath("$.validationErrors.priority").value("Priority is required"));
     }
 

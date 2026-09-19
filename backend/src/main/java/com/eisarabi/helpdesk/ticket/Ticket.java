@@ -17,6 +17,12 @@ public class Ticket {
     @Column(nullable = false, length = 2000)
     private String description;
 
+    @Column(nullable = false, length = 100)
+    private String requester;
+
+    @Column(length = 100)
+    private String assignee;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TicketStatus status = TicketStatus.NEW;
@@ -76,6 +82,22 @@ public class Ticket {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getRequester() {
+        return requester;
+    }
+
+    public void setRequester(String requester) {
+        this.requester = requester;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
     }
 
     public TicketStatus getStatus() {

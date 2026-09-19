@@ -54,7 +54,7 @@ class TicketServiceTest {
         when(repository.save(ticket)).thenReturn(ticket);
 
         TicketResponse result = service.update(1L,
-                new TicketRequest("  New title  ", "  New description  ", TicketStatus.RESOLVED, TicketCategory.SOFTWARE, TicketPriority.HIGH));
+                new TicketRequest("  New title  ", "  New description  ", "Louis Zhao", "Alex Chan", TicketStatus.RESOLVED, TicketCategory.SOFTWARE, TicketPriority.HIGH));
 
         assertThat(result.title()).isEqualTo("New title");
         assertThat(result.description()).isEqualTo("New description");

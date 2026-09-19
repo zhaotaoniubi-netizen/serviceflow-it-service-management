@@ -12,6 +12,8 @@ const filters = reactive({ status: '', priority: '' })
 const form = reactive({
   title: '',
   description: '',
+  requester: '',
+  assignee: '',
   status: 'NEW',
   category: 'OTHER',
   priority: 'MEDIUM'
@@ -67,6 +69,8 @@ function openCreate() {
   Object.assign(form, {
   title: '',
   description: '',
+  requester: '',
+  assignee: '',
   status: 'NEW',
   category: 'OTHER',
   priority: 'MEDIUM'
@@ -149,6 +153,30 @@ onMounted(loadTickets)
       <form class="modal" @submit.prevent="saveTicket"><div class="modal-heading"><div><p class="eyebrow">{{ editingId ? 'UPDATE REQUEST' : 'NEW REQUEST' }}</p><h2>{{ editingId ? 'Edit ticket' : 'Create a ticket' }}</h2></div><button type="button" class="close" aria-label="Close" @click="showForm = false">×</button></div>
         <label>Title<input v-model="form.title" maxlength="120" placeholder="Briefly describe the issue" required /><small v-if="fieldErrors.title" class="error-text">{{ fieldErrors.title }}</small></label>
         <label>Description<textarea v-model="form.description" maxlength="2000" rows="5" placeholder="Add context, symptoms and useful details" required></textarea><small v-if="fieldErrors.description" class="error-text">{{ fieldErrors.description }}</small></label>
+        <label>
+  Requester
+  <input
+    v-model="form.requester"
+    maxlength="100"
+    placeholder="Name of the person submitting the request"
+    required
+  />
+  <small v-if="fieldErrors.requester" class="error-text">
+    {{ fieldErrors.requester }}
+  </small>
+</label>
+
+<label>
+  Assignee
+  <input
+    v-model="form.assignee"
+    maxlength="100"
+    placeholder="IT staff responsible for this ticket"
+  />
+  <small v-if="fieldErrors.assignee" class="error-text">
+    {{ fieldErrors.assignee }}
+  </small>
+</label>
         <label>
   Category
   <select v-model="form.category">
