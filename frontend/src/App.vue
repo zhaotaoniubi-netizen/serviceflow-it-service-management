@@ -87,13 +87,13 @@ onMounted(loadTickets)
 <template>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand"><span class="brand-mark">H</span><div><strong>HelpDesk</strong><small>Support workspace</small></div></div>
+      <div class="brand"><span class="brand-mark">H</span><div><strong>ServiceFlow</strong><small>IT service workspace</small></div></div>
       <nav><a class="active" href="#"><span>▦</span> Tickets</a></nav>
       <div class="sidebar-note"><span class="pulse"></span><div><strong>System operational</strong><small>API connected locally</small></div></div>
     </aside>
 
     <main>
-      <header><div><p class="eyebrow">SUPPORT OVERVIEW</p><h1>Ticket dashboard</h1><p>Track requests, priorities and resolution progress.</p></div><button class="primary" @click="openCreate">＋ New ticket</button></header>
+      <header><div><p class="eyebrow">IT SERVICE OVERVIEW</p><h1>Ticket dashboard</h1><p>Track requests, priorities and resolution progress.</p></div><button class="primary" @click="openCreate">＋ New ticket</button></header>
 
       <section class="stats">
         <article><span class="stat-icon blue">▦</span><div><small>Total tickets</small><strong>{{ counts.total }}</strong></div></article>
