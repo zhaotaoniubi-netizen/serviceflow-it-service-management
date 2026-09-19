@@ -39,7 +39,7 @@ class TicketControllerIntegrationTest {
                                 {"title":"Email unavailable","description":"Cannot connect to mailbox","priority":"HIGH"}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.status").value("NEW"))
                 .andReturn().getResponse().getContentAsString();
 
         long id = Long.parseLong(createdJson.replaceAll(".*\\\"id\\\":(\\d+).*", "$1"));

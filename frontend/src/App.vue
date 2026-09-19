@@ -9,19 +9,29 @@ const error = ref('')
 const showForm = ref(false)
 const editingId = ref(null)
 const filters = reactive({ status: '', priority: '' })
-const form = reactive({ title: '', description: '', status: 'OPEN', priority: 'MEDIUM' })
+const form = reactive({ title: '', description: '', status: 'NEW', priority: 'MEDIUM' })
 const fieldErrors = ref({})
 
-const statuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED']
+const statuses = [
+  'NEW',
+  'ASSIGNED',
+  'IN_PROGRESS',
+  'WAITING_FOR_USER',
+  'RESOLVED',
+  'CLOSED'
+]
 const priorities = ['LOW', 'MEDIUM', 'HIGH','CRITICAL']
 const counts = computed(() => ({
   total: tickets.value.length,
-  open: tickets.value.filter((ticket) => ticket.status === 'OPEN').length,
-  progress: tickets.value.filter((ticket) => ticket.status === 'IN_PROGRESS').length,
+  new: tickets.value.filter((ticket) => ticket.status === 'NEW').length,
+  active: tickets.value.filter((ticket) =>
+    ['ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_USER'].includes(ticket.status)
+  ).length,
   resolved: tickets.value.filter((ticket) => ticket.status === 'RESOLVED').length,
 }))
 
-const label = (value) => value.replace('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())
+const label = (value) =>
+  value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())
 const formatDate = (value) => new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 
 async function loadTickets() {
@@ -38,7 +48,7 @@ async function loadTickets() {
 
 function openCreate() {
   editingId.value = null
-  Object.assign(form, { title: '', description: '', status: 'OPEN', priority: 'MEDIUM' })
+  Object.assign(form, { title: '', description: '', status: 'NEW', priority: 'MEDIUM' })
   fieldErrors.value = {}
   showForm.value = true
 }
@@ -97,8 +107,8 @@ onMounted(loadTickets)
 
       <section class="stats">
         <article><span class="stat-icon blue">▦</span><div><small>Total tickets</small><strong>{{ counts.total }}</strong></div></article>
-        <article><span class="stat-icon amber">○</span><div><small>Open</small><strong>{{ counts.open }}</strong></div></article>
-        <article><span class="stat-icon violet">↻</span><div><small>In progress</small><strong>{{ counts.progress }}</strong></div></article>
+        <article><span class="stat-icon amber">○</span><div><small>New</small><strong>{{ counts.new }}</strong></div></article>
+        <article><span class="stat-icon violet">↻</span><div><small>Active</small><strong>{{ counts.active }}</strong></div></article>
         <article><span class="stat-icon green">✓</span><div><small>Resolved</small><strong>{{ counts.resolved }}</strong></div></article>
       </section>
 

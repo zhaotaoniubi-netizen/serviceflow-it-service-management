@@ -29,10 +29,10 @@ class TicketServiceTest {
     @Test
     void filtersByStatusAndPriority() {
         Ticket ticket = new Ticket("Printer offline", "The office printer is unreachable", TicketPriority.HIGH);
-        when(repository.findByStatusAndPriorityOrderByCreatedAtDesc(TicketStatus.OPEN, TicketPriority.HIGH))
+        when(repository.findByStatusAndPriorityOrderByCreatedAtDesc(TicketStatus.NEW, TicketPriority.HIGH))
                 .thenReturn(List.of(ticket));
 
-        List<TicketResponse> result = service.findAll(TicketStatus.OPEN, TicketPriority.HIGH);
+        List<TicketResponse> result = service.findAll(TicketStatus.NEW, TicketPriority.HIGH);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().title()).isEqualTo("Printer offline");

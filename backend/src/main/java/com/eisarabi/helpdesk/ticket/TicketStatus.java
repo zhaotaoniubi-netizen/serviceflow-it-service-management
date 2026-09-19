@@ -1,7 +1,10 @@
 package com.eisarabi.helpdesk.ticket;
 
 public enum TicketStatus {
-    OPEN,
+    NEW,
+    ASSIGNED,
     IN_PROGRESS,
-    RESOLVED
+    WAITING_FOR_USER,
+    RESOLVED,
+    CLOSED
 }

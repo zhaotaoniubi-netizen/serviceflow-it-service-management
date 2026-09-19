@@ -50,8 +50,13 @@ th { color: #8a95a5; background: #fafbfc; font-size: 10px; letter-spacing: .5px;
 td { padding: 16px 20px; border-top: 1px solid #edf0f4; color: #697587; font-size: 12px; }
 td:first-child { width: 42%; } td strong { color: #263143; display: block; font-size: 13px; margin-bottom: 4px; } td p { max-width: 440px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 4px; } td small { color: #a0a9b5; }
 .badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 5px 9px; font-weight: 600; font-size: 10px; }.badge i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-.status-open { color: #b26d0b; background: #fff5df; }.status-in_progress { color: #376ac6; background: #edf4ff; }.status-resolved { color: #21855e; background: #e8f7f0; }
-.priority { font-weight: 700; font-size: 10px; }.priority.high { color: #c14949; }.priority.medium { color: #b87812; }.priority.low { color: #4e7d68; }
+.status-new { color: #b26d0b; background: #fff5df; }
+.status-assigned { color: #6b5ac7; background: #f2efff; }
+.status-in_progress { color: #376ac6; background: #edf4ff; }
+.status-waiting_for_user { color: #a16b19; background: #fff6e6; }
+.status-resolved { color: #21855e; background: #e8f7f0; }
+.status-closed { color: #667085; background: #f2f4f7; }
+.priority { font-weight: 700; font-size: 10px; }.priority.high { color: #c14949; }.priority.medium { color: #b87812; }.priority.low { color: #4e7d68; }.priority.critical { color: #a61b1b; }
 .actions { white-space: nowrap; text-align: right; }.actions button { border: 0; background: transparent; color: #3d6fc7; font-weight: 600; font-size: 11px; padding: 6px; }.actions button.danger { color: #bd5555; }
 .empty { padding: 62px 20px; text-align: center; color: #8793a3; }.empty > span { display: inline-grid; place-items: center; width: 43px; height: 43px; background: #edf4ff; color: #3977ed; border-radius: 50%; font-size: 20px; }.empty h3 { color: #334052; font-size: 15px; margin: 13px 0 5px; }.empty p { font-size: 12px; }.spinner { margin: 0 auto 12px; width: 28px; height: 28px; border: 3px solid #e5e9ef; border-top-color: #3977ed; border-radius: 50%; animation: spin .7s linear infinite; }@keyframes spin { to { transform: rotate(360deg); } }
 .modal-backdrop { position: fixed; inset: 0; background: #0c1726a8; display: grid; place-items: center; padding: 20px; z-index: 10; backdrop-filter: blur(2px); }

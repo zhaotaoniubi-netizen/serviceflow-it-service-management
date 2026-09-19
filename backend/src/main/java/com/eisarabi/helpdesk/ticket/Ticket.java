@@ -19,7 +19,7 @@ public class Ticket {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TicketStatus status = TicketStatus.OPEN;
+    private TicketStatus status = TicketStatus.NEW;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,7 +38,7 @@ public class Ticket {
         this.title = title;
         this.description = description;
         this.priority = priority;
-        this.status = TicketStatus.OPEN;
+        this.status = TicketStatus.NEW;
     }
 
     @PrePersist
