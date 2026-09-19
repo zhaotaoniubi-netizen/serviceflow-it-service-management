@@ -13,7 +13,7 @@ const form = reactive({ title: '', description: '', status: 'OPEN', priority: 'M
 const fieldErrors = ref({})
 
 const statuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED']
-const priorities = ['LOW', 'MEDIUM', 'HIGH']
+const priorities = ['LOW', 'MEDIUM', 'HIGH','CRITICAL']
 const counts = computed(() => ({
   total: tickets.value.length,
   open: tickets.value.filter((ticket) => ticket.status === 'OPEN').length,
