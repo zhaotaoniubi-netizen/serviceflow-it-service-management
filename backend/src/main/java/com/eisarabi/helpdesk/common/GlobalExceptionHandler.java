@@ -1,5 +1,5 @@
 package com.eisarabi.helpdesk.common;
-
+import com.eisarabi.helpdesk.ticket.AccessDeniedException;
 import com.eisarabi.helpdesk.ticket.TicketNotFoundException;
 import com.eisarabi.helpdesk.ticket.TicketBusinessRuleException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,4 +55,16 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(), errors);
         return ResponseEntity.status(status).body(body);
     }
+    @ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<ApiError> handleAccessDenied(
+        AccessDeniedException exception,
+        HttpServletRequest request) {
+
+    return build(
+            HttpStatus.FORBIDDEN,
+            exception.getMessage(),
+            request,
+            Map.of()
+    );
+}
 }

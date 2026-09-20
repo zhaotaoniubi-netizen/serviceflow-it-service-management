@@ -34,20 +34,52 @@ public class TicketController {
     }
 
     @PutMapping("/{id}")
-    public TicketResponse updateTicket(
-            @PathVariable Long id,
-            @Valid @RequestBody TicketRequest updatedTicket) {
-        return ticketService.update(id, updatedTicket);
+    public TicketResponse update(
+        @PathVariable Long id,
+        @Valid @RequestBody TicketRequest request,
+        @RequestHeader(
+                value = "X-User-Role",
+                defaultValue = "EMPLOYEE"
+        ) UserRole role) {
+
+    requireSupportOrAdmin(role);
+
+    return ticketService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTicket(@PathVariable Long id) {
+    public void delete(
+        @PathVariable Long id,
+        @RequestHeader(
+                value = "X-User-Role",
+                defaultValue = "EMPLOYEE"
+        ) UserRole role) {
 
-        ticketService.delete(id);
-    }
+    requireAdmin(role);
+
+    ticketService.delete(id);
+}
+
     @GetMapping("/{id}/activities")
     public List<TicketActivity> getActivities(@PathVariable Long id) {
     return ticketService.getActivities(id);
     }
+    private void requireSupportOrAdmin(UserRole role) {
+    if (role == UserRole.EMPLOYEE) {
+        throw new AccessDeniedException(
+                "IT Support or Admin role is required for this operation"
+        );
+    }
+}
+
+    private void requireAdmin(UserRole role) {
+    if (role != UserRole.ADMIN) {
+        throw new AccessDeniedException(
+                "Admin role is required for this operation"
+        );
+    }
+}
+
+
 }

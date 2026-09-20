@@ -10,6 +10,13 @@ const showForm = ref(false)
 const editingId = ref(null)
 const filters = reactive({ status: '', priority: '' })
 const searchQuery = ref('')
+const currentRole = ref('EMPLOYEE')
+
+const roles = [
+  'EMPLOYEE',
+  'IT_SUPPORT',
+  'ADMIN'
+]
 const form = reactive({
   title: '',
   description: '',
@@ -148,7 +155,13 @@ async function saveTicket() {
   saving.value = true
   fieldErrors.value = {}
   try {
-    if (editingId.value) await ticketApi.update(editingId.value, form)
+    if (editingId.value) {
+  await ticketApi.update(
+    editingId.value,
+    form,
+    currentRole.value
+  )
+}
     else await ticketApi.create(form)
     showForm.value = false
     await loadTickets()
@@ -163,7 +176,10 @@ async function saveTicket() {
 async function deleteTicket(ticket) {
   if (!window.confirm(`Delete “${ticket.title}”? This cannot be undone.`)) return
   try {
-    await ticketApi.remove(ticket.id)
+    await ticketApi.remove(
+  ticket.id,
+  currentRole.value
+)
     await loadTickets()
   } catch (apiError) {
     error.value = apiError.message || 'Could not delete the ticket.'
@@ -187,7 +203,20 @@ onMounted(loadTickets)
     </aside>
 
     <main>
-      <header><div><p class="eyebrow">IT SERVICE OVERVIEW</p><h1>Ticket dashboard</h1><p>Track requests, priorities and resolution progress.</p></div><button class="primary" @click="openCreate">＋ New ticket</button></header>
+      <header><div><p class="eyebrow">IT SERVICE OVERVIEW</p><h1>Ticket dashboard</h1><p>Track requests, priorities and resolution progress.</p></div><button class="primary" @click="openCreate"><div class="header-actions">
+  <select
+  v-model="currentRole"
+  class="role-select"
+>
+    <option value="EMPLOYEE">Employee</option>
+    <option value="IT_SUPPORT">IT Support</option>
+    <option value="ADMIN">Admin</option>
+  </select>
+
+  <button class="primary" @click="openCreate">
+    ＋ New ticket
+  </button>
+</div></button></header>
 
       <section class="stats">
         <article><span class="stat-icon blue">▦</span><div><small>Total tickets</small><strong>{{ counts.total }}</strong></div></article>
@@ -283,20 +312,22 @@ onMounted(loadTickets)
         </td>
 
         <td class="actions">
-          <button
-            title="Edit ticket"
-            @click="openEdit(ticket)"
-          >
-            Edit
-          </button>
+        <button
+          v-if="currentRole !== 'EMPLOYEE'"
+          title="Edit ticket"
+          @click="openEdit(ticket)"
+        >
+          Edit
+        </button>
 
-          <button
-            class="danger"
-            title="Delete ticket"
-            @click="deleteTicket(ticket)"
-          >
-            Delete
-          </button>
+        <button
+          v-if="currentRole === 'ADMIN'"
+          class="danger"
+          title="Delete ticket"
+          @click="deleteTicket(ticket)"
+        >
+          Delete
+        </button>
         </td>
       </tr>
     </tbody>

@@ -52,8 +52,9 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Email unavailable"));
 
-        mockMvc.perform(put("/api/tickets/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
+       mockMvc.perform(put("/api/tickets/{id}", id)
+        .header("X-User-Role", "IT_SUPPORT")
+        .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"Email restored","description":"Mailbox is available","requester":"Louis Zhao","assignee":"Alex Chan","status":"RESOLVED","category":"ACCOUNT","priority":"HIGH"}
                                 """))
@@ -64,7 +65,9 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
 
-        mockMvc.perform(delete("/api/tickets/{id}", id)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/tickets/{id}", id)
+        .header("X-User-Role", "ADMIN"))
+        .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/tickets/{id}", id)).andExpect(status().isNotFound());
     }
 
@@ -169,5 +172,73 @@ void reportsOverdueSlaWhenDueDateHasPassed() throws Exception {
     mockMvc.perform(get("/api/tickets/{id}", id))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.slaStatus").value("OVERDUE"));
+}
+@Test
+void enforcesRoleBasedTicketPermissions() throws Exception {
+    String createdJson = mockMvc.perform(post("/api/tickets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                              "title":"RBAC test",
+                              "description":"Verify role permissions",
+                              "requester":"Louis Zhao",
+                              "assignee":"",
+                              "status":"NEW",
+                              "category":"SOFTWARE",
+                              "priority":"MEDIUM"
+                            }
+                            """))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    long id = Long.parseLong(
+            createdJson.replaceAll(".*\\\"id\\\":(\\d+).*", "$1")
+    );
+
+    // Employee cannot update
+    mockMvc.perform(put("/api/tickets/{id}", id)
+                    .header("X-User-Role", "EMPLOYEE")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                              "title":"RBAC test",
+                              "description":"Employee update attempt",
+                              "requester":"Louis Zhao",
+                              "assignee":"",
+                              "status":"NEW",
+                              "category":"SOFTWARE",
+                              "priority":"MEDIUM"
+                            }
+                            """))
+            .andExpect(status().isForbidden());
+
+    // IT Support can update
+    mockMvc.perform(put("/api/tickets/{id}", id)
+                    .header("X-User-Role", "IT_SUPPORT")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                              "title":"RBAC updated",
+                              "description":"Updated by IT Support",
+                              "requester":"Louis Zhao",
+                              "assignee":"Alex Chan",
+                              "status":"ASSIGNED",
+                              "category":"SOFTWARE",
+                              "priority":"MEDIUM"
+                            }
+                            """))
+            .andExpect(status().isOk());
+
+    // IT Support cannot delete
+    mockMvc.perform(delete("/api/tickets/{id}", id)
+                    .header("X-User-Role", "IT_SUPPORT"))
+            .andExpect(status().isForbidden());
+
+    // Admin can delete
+    mockMvc.perform(delete("/api/tickets/{id}", id)
+                    .header("X-User-Role", "ADMIN"))
+            .andExpect(status().isNoContent());
 }
 }

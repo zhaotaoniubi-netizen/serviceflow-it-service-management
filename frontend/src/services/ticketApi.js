@@ -25,13 +25,24 @@ export const ticketApi = {
   create(ticket) {
     return request('', { method: 'POST', body: JSON.stringify(ticket) })
   },
-  update(id, ticket) {
-    return request(`/${id}`, { method: 'PUT', body: JSON.stringify(ticket) })
+  update(id, ticket, role) {
+    return request(`/${id}`, {
+      method: 'PUT',
+      headers: {
+        'X-User-Role': role
+      },
+      body: JSON.stringify(ticket)
+    })
   },
   activities(id) {
   return request(`/${id}/activities`)
   },
-  remove(id) {
-    return request(`/${id}`, { method: 'DELETE' })
+  remove(id, role) {
+    return request(`/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-User-Role': role
+      }
+    })
   },
 }
