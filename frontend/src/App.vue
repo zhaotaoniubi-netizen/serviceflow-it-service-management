@@ -154,6 +154,7 @@ async function openEdit(ticket) {
 async function saveTicket() {
   saving.value = true
   fieldErrors.value = {}
+  error.value = ''
   try {
     if (editingId.value) {
   await ticketApi.update(
@@ -203,21 +204,28 @@ onMounted(loadTickets)
     </aside>
 
     <main>
-      <header><div><p class="eyebrow">IT SERVICE OVERVIEW</p><h1>Ticket dashboard</h1><p>Track requests, priorities and resolution progress.</p></div><button class="primary" @click="openCreate"><div class="header-actions">
-  <select
-  v-model="currentRole"
-  class="role-select"
->
-    <option value="EMPLOYEE">Employee</option>
-    <option value="IT_SUPPORT">IT Support</option>
-    <option value="ADMIN">Admin</option>
-  </select>
+      <header>
+  <div>
+    <p class="eyebrow">IT SERVICE OVERVIEW</p>
+    <h1>Ticket dashboard</h1>
+    <p>Track requests, priorities and resolution progress.</p>
+  </div>
 
-  <button class="primary" @click="openCreate">
-    ＋ New ticket
-  </button>
-</div></button></header>
+  <div class="header-actions">
+    <select
+      v-model="currentRole"
+      class="role-select"
+    >
+      <option value="EMPLOYEE">Employee</option>
+      <option value="IT_SUPPORT">IT Support</option>
+      <option value="ADMIN">Admin</option>
+    </select>
 
+    <button class="primary" @click="openCreate">
+      ＋ New ticket
+    </button>
+  </div>
+</header>
       <section class="stats">
         <article><span class="stat-icon blue">▦</span><div><small>Total tickets</small><strong>{{ counts.total }}</strong></div></article>
         <article><span class="stat-icon amber">○</span><div><small>New</small><strong>{{ counts.new }}</strong></div></article>

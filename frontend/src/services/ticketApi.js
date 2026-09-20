@@ -1,10 +1,13 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 async function request(path = '', options = {}) {
-  const response = await fetch(`${API_BASE_URL}/tickets${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  })
+const response = await fetch(`${API_BASE_URL}/tickets${path}`, {
+  ...options,
+  headers: {
+    'Content-Type': 'application/json',
+    ...options.headers
+  },
+})
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'The server could not complete the request.' }))
