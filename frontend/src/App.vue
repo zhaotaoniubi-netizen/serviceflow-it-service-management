@@ -9,6 +9,7 @@ const error = ref('')
 const showForm = ref(false)
 const editingId = ref(null)
 const filters = reactive({ status: '', priority: '' })
+const searchQuery = ref('')
 const form = reactive({
   title: '',
   description: '',
@@ -42,6 +43,28 @@ const categories = [
 ]
 
 const priorities = ['LOW', 'MEDIUM', 'HIGH','CRITICAL']
+const visibleTickets = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+
+  if (!query) {
+    return tickets.value
+  }
+
+  return tickets.value.filter((ticket) => {
+    const searchableText = [
+      ticket.title,
+      ticket.description,
+      ticket.requester,
+      ticket.assignee,
+      ticket.category
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+
+    return searchableText.includes(query)
+  })
+})
 const counts = computed(() => ({
   total: tickets.value.length,
 
@@ -62,6 +85,8 @@ const counts = computed(() => ({
     (ticket) => ticket.slaStatus === 'OVERDUE'
   ).length,
 }))
+
+
 
 const label = (value) =>
   value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())
@@ -181,10 +206,17 @@ onMounted(loadTickets)
       <p v-if="error" class="alert">{{ error }} <button aria-label="Dismiss" @click="error = ''">×</button></p>
 
       <section class="panel">
-        <div class="panel-heading"><div><h2>All tickets</h2><p>{{ tickets.length }} results in the current view</p></div><div class="filters"><select v-model="filters.status" aria-label="Filter by status"><option value="">All statuses</option><option v-for="status in statuses" :key="status" :value="status">{{ label(status) }}</option></select><select v-model="filters.priority" aria-label="Filter by priority"><option value="">All priorities</option><option v-for="priority in priorities" :key="priority" :value="priority">{{ label(priority) }}</option></select></div></div>
+        <div class="panel-heading"><div><h2>All tickets</h2><p>{{ visibleTickets.length }} results in the current view</p></div><div class="filters">
+          <input
+  v-model="searchQuery"
+  class="ticket-search"
+  type="search"
+  placeholder="Search tickets..."
+  aria-label="Search tickets"
+/><select v-model="filters.status" aria-label="Filter by status"><option value="">All statuses</option><option v-for="status in statuses" :key="status" :value="status">{{ label(status) }}</option></select><select v-model="filters.priority" aria-label="Filter by priority"><option value="">All priorities</option><option v-for="priority in priorities" :key="priority" :value="priority">{{ label(priority) }}</option></select></div></div>
 
         <div v-if="loading" class="empty"><div class="spinner"></div><p>Loading tickets…</p></div>
-        <div v-else-if="!tickets.length" class="empty"><span>✓</span><h3>No tickets found</h3><p>Adjust the filters or create your first support ticket.</p><button class="secondary" @click="openCreate">Create ticket</button></div>
+        <div v-else-if="!visibleTickets.length" class="empty"><span>✓</span><h3>No tickets found</h3><p>Adjust the filters or create your first support ticket.</p><button class="secondary" @click="openCreate">Create ticket</button></div>
         <div v-else class="table-wrap">
   <table>
     <thead>
@@ -203,7 +235,7 @@ onMounted(loadTickets)
 
     <tbody>
       <tr
-        v-for="ticket in tickets"
+        v-for="ticket in visibleTickets"
         :key="ticket.id"
       >
         <td>

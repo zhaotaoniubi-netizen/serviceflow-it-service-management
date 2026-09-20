@@ -96,3 +96,18 @@ td:first-child { width: 42%; } td strong { color: #263143; display: block; font-
 .stats {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
+.ticket-search {
+  min-width: 220px;
+  padding: 9px 12px;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  font: inherit;
+  color: #1e293b;
+}
+
+.ticket-search:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
