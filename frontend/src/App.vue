@@ -44,11 +44,23 @@ const categories = [
 const priorities = ['LOW', 'MEDIUM', 'HIGH','CRITICAL']
 const counts = computed(() => ({
   total: tickets.value.length,
-  new: tickets.value.filter((ticket) => ticket.status === 'NEW').length,
-  active: tickets.value.filter((ticket) =>
-    ['ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_USER'].includes(ticket.status)
+
+  new: tickets.value.filter(
+    (ticket) => ticket.status === 'NEW'
   ).length,
-  resolved: tickets.value.filter((ticket) => ticket.status === 'RESOLVED').length,
+
+  active: tickets.value.filter((ticket) =>
+    ['ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_USER']
+      .includes(ticket.status)
+  ).length,
+
+  resolved: tickets.value.filter(
+    (ticket) => ticket.status === 'RESOLVED'
+  ).length,
+
+  overdue: tickets.value.filter(
+    (ticket) => ticket.slaStatus === 'OVERDUE'
+  ).length,
 }))
 
 const label = (value) =>
@@ -157,6 +169,13 @@ onMounted(loadTickets)
         <article><span class="stat-icon amber">○</span><div><small>New</small><strong>{{ counts.new }}</strong></div></article>
         <article><span class="stat-icon violet">↻</span><div><small>Active</small><strong>{{ counts.active }}</strong></div></article>
         <article><span class="stat-icon green">✓</span><div><small>Resolved</small><strong>{{ counts.resolved }}</strong></div></article>
+        <article>
+  <span class="stat-icon red">!</span>
+  <div>
+    <small>Overdue</small>
+    <strong>{{ counts.overdue }}</strong>
+  </div>
+</article>
       </section>
 
       <p v-if="error" class="alert">{{ error }} <button aria-label="Dismiss" @click="error = ''">×</button></p>
@@ -166,7 +185,91 @@ onMounted(loadTickets)
 
         <div v-if="loading" class="empty"><div class="spinner"></div><p>Loading tickets…</p></div>
         <div v-else-if="!tickets.length" class="empty"><span>✓</span><h3>No tickets found</h3><p>Adjust the filters or create your first support ticket.</p><button class="secondary" @click="openCreate">Create ticket</button></div>
-        <div v-else class="table-wrap"><table><thead><tr><th>Ticket</th><th>Category</th><th>Status</th><th>Priority</th><th>Created</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody><tr v-for="ticket in tickets" :key="ticket.id"><td><strong>{{ ticket.title }}</strong><p>{{ ticket.description }}</p><small>#{{ String(ticket.id).padStart(4, '0') }}</small></td><td><span class="badge" :class="`status-${ticket.status.toLowerCase()}`"><i></i>{{ label(ticket.status) }}</span></td><td><span class="priority" :class="ticket.priority.toLowerCase()">{{ label(ticket.priority) }}</span></td><td>{{ formatDate(ticket.createdAt) }}</td><td class="actions"><button title="Edit ticket" @click="openEdit(ticket)">Edit</button><button class="danger" title="Delete ticket" @click="deleteTicket(ticket)">Delete</button></td></tr></tbody></table></div>
+        <div v-else class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Ticket</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>SLA</th>
+        <th>Due</th>
+        <th>Created</th>
+        <th>
+          <span class="sr-only">Actions</span>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        v-for="ticket in tickets"
+        :key="ticket.id"
+      >
+        <td>
+          <strong>{{ ticket.title }}</strong>
+          <p>{{ ticket.description }}</p>
+          <small>
+            #{{ String(ticket.id).padStart(4, '0') }}
+          </small>
+        </td>
+
+        <td>
+          <span
+            class="badge"
+            :class="`status-${ticket.status.toLowerCase()}`"
+          >
+            <i></i>
+            {{ label(ticket.status) }}
+          </span>
+        </td>
+
+        <td>
+          <span
+            class="priority"
+            :class="ticket.priority.toLowerCase()"
+          >
+            {{ label(ticket.priority) }}
+          </span>
+        </td>
+
+        <td>
+          <span
+            class="sla-badge"
+            :class="ticket.slaStatus.toLowerCase()"
+          >
+            {{ label(ticket.slaStatus) }}
+          </span>
+        </td>
+
+        <td>
+          {{ formatDate(ticket.dueAt) }}
+        </td>
+
+        <td>
+          {{ formatDate(ticket.createdAt) }}
+        </td>
+
+        <td class="actions">
+          <button
+            title="Edit ticket"
+            @click="openEdit(ticket)"
+          >
+            Edit
+          </button>
+
+          <button
+            class="danger"
+            title="Delete ticket"
+            @click="deleteTicket(ticket)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
       </section>
     </main>
 

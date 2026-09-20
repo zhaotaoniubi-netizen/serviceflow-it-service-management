@@ -37,7 +37,10 @@ public class Ticket {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
+    
+    @Column(nullable = false)
+    private LocalDateTime dueAt;
+   
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
@@ -129,5 +132,12 @@ public class Ticket {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+    public LocalDateTime getDueAt() {
+    return dueAt;
+    }
+
+    public void setDueAt(LocalDateTime dueAt) {
+        this.dueAt = dueAt;
     }
 }

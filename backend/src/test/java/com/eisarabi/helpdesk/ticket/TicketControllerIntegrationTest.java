@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -135,5 +136,38 @@ void recordsCreatedActivityForNewTicket() throws Exception {
             .andExpect(jsonPath("$[0].ticketId").value(id))
             .andExpect(jsonPath("$[0].type").value("CREATED"))
             .andExpect(jsonPath("$[0].details").value("Ticket created"));
+}
+@Test
+void reportsOverdueSlaWhenDueDateHasPassed() throws Exception {
+    String createdJson = mockMvc.perform(post("/api/tickets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                              "title":"Overdue SLA test",
+                              "description":"Verify overdue SLA status",
+                              "requester":"Louis Zhao",
+                              "assignee":"",
+                              "status":"NEW",
+                              "category":"SOFTWARE",
+                              "priority":"HIGH"
+                            }
+                            """))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    long id = Long.parseLong(
+            createdJson.replaceAll(".*\\\"id\\\":(\\d+).*", "$1")
+    );
+
+    Ticket ticket = repository.findById(id).orElseThrow();
+
+    ticket.setDueAt(LocalDateTime.now().minusHours(1));
+    repository.save(ticket);
+
+    mockMvc.perform(get("/api/tickets/{id}", id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.slaStatus").value("OVERDUE"));
 }
 }

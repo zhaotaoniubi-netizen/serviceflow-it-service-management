@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,6 +42,12 @@ public class TicketService {
     @Transactional
     public TicketResponse create(TicketRequest request) {
         Ticket ticket = new Ticket(request.title().trim(), request.description().trim(),  request.category(), request.priority());
+        ticket.setDueAt(
+        calculateDueAt(
+                LocalDateTime.now(),
+                request.priority()
+        )
+        );
         ticket.setRequester(request.requester().trim());
 
         if (request.assignee() != null && !request.assignee().isBlank()) {
@@ -80,6 +87,14 @@ return TicketResponse.from(savedTicket);
             );
         ticket.setCategory(request.category());
         ticket.setPriority(request.priority());
+        if (oldPriority != ticket.getPriority()) {
+    ticket.setDueAt(
+            calculateDueAt(
+                    ticket.getCreatedAt(),
+                    ticket.getPriority()
+            )
+    );
+}
         TicketStatus targetStatus =
         request.status() == null ? ticket.getStatus() : request.status();
 
@@ -157,5 +172,21 @@ private String formatValue(String value) {
     return value == null || value.isBlank()
             ? "Unassigned"
             : value;
+}
+private LocalDateTime calculateDueAt(
+        LocalDateTime baseTime,
+        TicketPriority priority) {
+
+    LocalDateTime effectiveBaseTime =
+            baseTime != null ? baseTime : LocalDateTime.now();
+
+    long hours = switch (priority) {
+        case CRITICAL -> 4;
+        case HIGH -> 8;
+        case MEDIUM -> 24;
+        case LOW -> 48;
+    };
+
+    return effectiveBaseTime.plusHours(hours);
 }
 }
