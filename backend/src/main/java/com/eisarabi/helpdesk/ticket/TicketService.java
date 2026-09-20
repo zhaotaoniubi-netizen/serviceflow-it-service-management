@@ -5,14 +5,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(readOnly = true)
 public class TicketService {
     private final TicketRepository ticketRepository;
+    private final TicketActivityRepository ticketActivityRepository;
 
-    public TicketService(TicketRepository ticketRepository) {
-        this.ticketRepository = ticketRepository;
+    public TicketService(
+        TicketRepository ticketRepository,
+        TicketActivityRepository ticketActivityRepository) {
+    this.ticketRepository = ticketRepository;
+    this.ticketActivityRepository = ticketActivityRepository;
     }
 
     public List<TicketResponse> findAll(TicketStatus status, TicketPriority priority) {
@@ -46,12 +51,25 @@ public class TicketService {
         if (request.status() != null) {
             ticket.setStatus(request.status());
         }
-        return TicketResponse.from(ticketRepository.save(ticket));
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        ticketActivityRepository.save(
+        new TicketActivity(
+                savedTicket.getId(),
+                TicketActivityType.CREATED,
+                "Ticket created"
+        )
+);
+
+return TicketResponse.from(savedTicket);
     }
 
     @Transactional
     public TicketResponse update(Long id, TicketRequest request) {
         Ticket ticket = getTicket(id);
+        TicketStatus oldStatus = ticket.getStatus();
+        String oldAssignee = ticket.getAssignee();
+        TicketPriority oldPriority = ticket.getPriority();  
         ticket.setTitle(request.title().trim());
         ticket.setDescription(request.description().trim());
         ticket.setRequester(request.requester().trim());
@@ -68,7 +86,48 @@ public class TicketService {
         validateAssignmentRule(targetStatus, ticket.getAssignee());
 
         ticket.setStatus(targetStatus);
-        return TicketResponse.from(ticketRepository.save(ticket));
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+if (oldStatus != savedTicket.getStatus()) {
+    ticketActivityRepository.save(
+            new TicketActivity(
+                    savedTicket.getId(),
+                    TicketActivityType.STATUS_CHANGED,
+                    "Status changed from "
+                            + oldStatus
+                            + " to "
+                            + savedTicket.getStatus()
+            )
+    );
+}
+
+if (!Objects.equals(oldAssignee, savedTicket.getAssignee())) {
+    ticketActivityRepository.save(
+            new TicketActivity(
+                    savedTicket.getId(),
+                    TicketActivityType.ASSIGNEE_CHANGED,
+                    "Assignee changed from "
+                            + formatValue(oldAssignee)
+                            + " to "
+                            + formatValue(savedTicket.getAssignee())
+            )
+    );
+}
+
+if (oldPriority != savedTicket.getPriority()) {
+    ticketActivityRepository.save(
+            new TicketActivity(
+                    savedTicket.getId(),
+                    TicketActivityType.PRIORITY_CHANGED,
+                    "Priority changed from "
+                            + oldPriority
+                            + " to "
+                            + savedTicket.getPriority()
+            )
+    );
+}
+
+return TicketResponse.from(savedTicket);
     }
 
     @Transactional
@@ -86,5 +145,17 @@ public class TicketService {
                 "Assignee is required when status is ASSIGNED"
         );
     }
+}
+public List<TicketActivity> getActivities(Long ticketId) {
+    getTicket(ticketId);
+
+    return ticketActivityRepository
+            .findByTicketIdOrderByCreatedAtDesc(ticketId);
+}
+
+private String formatValue(String value) {
+    return value == null || value.isBlank()
+            ? "Unassigned"
+            : value;
 }
 }

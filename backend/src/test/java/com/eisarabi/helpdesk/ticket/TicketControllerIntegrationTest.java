@@ -25,11 +25,14 @@ class TicketControllerIntegrationTest {
 
     @Autowired
     private TicketRepository repository;
+        @Autowired
+        private TicketActivityRepository activityRepository;
 
     @BeforeEach
-    void clearDatabase() {
-        repository.deleteAll();
-    }
+        void clearDatabase() {
+    activityRepository.deleteAll();
+    repository.deleteAll();
+        }
 
     @Test
     void supportsCreateReadUpdateFilterAndDeleteWorkflow() throws Exception {
@@ -101,5 +104,36 @@ class TicketControllerIntegrationTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message")
                     .value("Assignee is required when status is ASSIGNED"));
+}
+@Test
+void recordsCreatedActivityForNewTicket() throws Exception {
+    String createdJson = mockMvc.perform(post("/api/tickets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                              "title":"Audit trail integration test",
+                              "description":"Verify ticket creation is recorded",
+                              "requester":"Louis Zhao",
+                              "assignee":"",
+                              "status":"NEW",
+                              "category":"SOFTWARE",
+                              "priority":"MEDIUM"
+                            }
+                            """))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    long id = Long.parseLong(
+            createdJson.replaceAll(".*\\\"id\\\":(\\d+).*", "$1")
+    );
+
+    mockMvc.perform(get("/api/tickets/{id}/activities", id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].ticketId").value(id))
+            .andExpect(jsonPath("$[0].type").value("CREATED"))
+            .andExpect(jsonPath("$[0].details").value("Ticket created"));
 }
 }

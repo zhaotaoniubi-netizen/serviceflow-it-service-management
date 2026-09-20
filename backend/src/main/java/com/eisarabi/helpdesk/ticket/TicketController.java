@@ -46,4 +46,8 @@ public class TicketController {
 
         ticketService.delete(id);
     }
+    @GetMapping("/{id}/activities")
+    public List<TicketActivity> getActivities(@PathVariable Long id) {
+    return ticketService.getActivities(id);
+    }
 }

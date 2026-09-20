@@ -19,6 +19,9 @@ const form = reactive({
   priority: 'MEDIUM'
 })
 const fieldErrors = ref({})
+const activities = ref([])
+const activitiesLoading = ref(false)
+const activitiesError = ref('')
 
 const statuses = [
   'NEW',
@@ -66,24 +69,42 @@ async function loadTickets() {
 
 function openCreate() {
   editingId.value = null
+  activities.value = []
+  activitiesError.value = ''
+
   Object.assign(form, {
-  title: '',
-  description: '',
-  requester: '',
-  assignee: '',
-  status: 'NEW',
-  category: 'OTHER',
-  priority: 'MEDIUM'
-})
+    title: '',
+    description: '',
+    requester: '',
+    assignee: '',
+    status: 'NEW',
+    category: 'OTHER',
+    priority: 'MEDIUM'
+  })
+
   fieldErrors.value = {}
   showForm.value = true
 }
 
-function openEdit(ticket) {
+async function openEdit(ticket) {
   editingId.value = ticket.id
   Object.assign(form, ticket)
+
   fieldErrors.value = {}
+  activities.value = []
+  activitiesError.value = ''
   showForm.value = true
+
+  activitiesLoading.value = true
+
+  try {
+    activities.value = await ticketApi.activities(ticket.id)
+  } catch (apiError) {
+    activitiesError.value =
+      apiError.message || 'Could not load activity history.'
+  } finally {
+    activitiesLoading.value = false
+  }
 }
 
 async function saveTicket() {
@@ -189,8 +210,90 @@ onMounted(loadTickets)
     </option>
   </select>
 </label>
-        <div class="form-row"><label>Status<select v-model="form.status"><option v-for="status in statuses" :key="status" :value="status">{{ label(status) }}</option></select></label><label>Priority<select v-model="form.priority"><option v-for="priority in priorities" :key="priority" :value="priority">{{ label(priority) }}</option></select></label></div>
-        <div class="modal-actions"><button type="button" class="secondary" @click="showForm = false">Cancel</button><button class="primary" :disabled="saving">{{ saving ? 'Saving…' : editingId ? 'Save changes' : 'Create ticket' }}</button></div>
+<div class="form-row">
+  <label>
+    Status
+    <select v-model="form.status">
+      <option
+        v-for="status in statuses"
+        :key="status"
+        :value="status"
+      >
+        {{ label(status) }}
+      </option>
+    </select>
+  </label>
+
+  <label>
+    Priority
+    <select v-model="form.priority">
+      <option
+        v-for="priority in priorities"
+        :key="priority"
+        :value="priority"
+      >
+        {{ label(priority) }}
+      </option>
+    </select>
+  </label>
+</div>
+
+<section v-if="editingId" class="activity-section">
+  <div class="activity-heading">
+    <div>
+      <p class="eyebrow">AUDIT TRAIL</p>
+      <h3>Activity history</h3>
+    </div>
+
+<span v-if="activities.length">
+  {{ activities.length }}
+  {{ activities.length === 1 ? 'event' : 'events' }}
+  </span>
+  </div>
+
+  <div v-if="activitiesLoading" class="activity-state">
+    Loading history…
+  </div>
+
+  <div v-else-if="activitiesError" class="activity-error">
+    {{ activitiesError }}
+  </div>
+
+  <div v-else-if="!activities.length" class="activity-state">
+    No activity recorded yet.
+  </div>
+
+  <div v-else class="activity-list">
+    <article
+      v-for="activity in activities"
+      :key="activity.id"
+      class="activity-item"
+    >
+      <span class="activity-dot"></span>
+
+      <div>
+        <strong>{{ label(activity.type) }}</strong>
+        <p>{{ activity.details }}</p>
+        <small>{{ formatDate(activity.createdAt) }}</small>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="modal-actions">
+  <button
+    type="button"
+    class="secondary"
+    @click="showForm = false"
+  >
+    Cancel
+  </button>
+
+  <button class="primary" :disabled="saving">
+    {{ saving ? 'Saving…' : editingId ? 'Save changes' : 'Create ticket' }}
+  </button>
+</div>
+     
       </form>
     </div>
   </div>

@@ -28,6 +28,9 @@ export const ticketApi = {
   update(id, ticket) {
     return request(`/${id}`, { method: 'PUT', body: JSON.stringify(ticket) })
   },
+  activities(id) {
+  return request(`/${id}/activities`)
+  },
   remove(id) {
     return request(`/${id}`, { method: 'DELETE' })
   },

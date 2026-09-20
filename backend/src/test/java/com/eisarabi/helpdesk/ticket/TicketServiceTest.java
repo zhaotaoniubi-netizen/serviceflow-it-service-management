@@ -18,12 +18,13 @@ import static org.mockito.Mockito.when;
 class TicketServiceTest {
     @Mock
     private TicketRepository repository;
-
+    @Mock
+    private TicketActivityRepository ticketActivityRepository;
     private TicketService service;
 
     @BeforeEach
     void setUp() {
-        service = new TicketService(repository);
+        service = new TicketService(repository , ticketActivityRepository);
     }
 
     @Test
